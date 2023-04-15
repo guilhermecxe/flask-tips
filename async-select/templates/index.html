@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Async Select Example</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('.async-select').select2({ // aqui o plugin Select2 é inicializado no elemento selecionado
+                ajax: {
+                    url: '/search',
+                    dataType: 'json',
+                    delay: 250, // esse é o tempo em milisegundos entre o momento que o usuário digita e o request é feito
+                    data: function(params){
+                        return {
+                            q: params.term, // o termo inserido pelo usuário
+                            page: params.page // especifica a página de resultados, nesse caso, é sempre None
+                        };
+                    },
+                    processResults: function(data, params){
+                        params.page = params.page || 1;
+                        return {
+                            results: data,
+                            pagination: {
+                                more: (params.page * 10) < data.length
+                            }
+                        };
+                    },
+                    cache: true // escolhendo armazenar antigos resultados para melhorar a performance
+                },
+                minimumInputLength: 3, // a quantidade mínima de caracteres antes de enviar a requisição
+                placeholder: 'Search...',
+                allowClear: false // se verdadeiro, mostra um "x" para o usuário limpar o input
+            });
+        });
+    </script>
+</head>
+<body>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{message}}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form action="{{url_for('index')}}" method="post">
+        {{form.hidden_tag()}}
+
+        <p>
+            {{form.select.label}}
+            {{form.select(class='async-select', style="width: 50%;")}}
+            {% for error in form.select.errors %}
+                <span style="color: red">[{{error}}]</span>
+            {% endfor %}
+        </p>
+        <p>{{form.submit()}}</p>
+    </form>
+</body>
+</html>
