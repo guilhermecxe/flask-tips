@@ -3,6 +3,6 @@ from wtforms import SelectField, SubmitField
 from wtforms.validators import DataRequired
 
 class Form(FlaskForm):
-    select = SelectField('Select', choices=[], validate_choice=False)
+    select = SelectField('Select', choices=[], validate_choice=False, validators=[DataRequired()])
     # validate_choice=False para permitir que escolhas diferentes das pré-selecionadas sejam válidas
     submit = SubmitField('Submit')
